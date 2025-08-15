@@ -5,6 +5,13 @@ from dateutil.relativedelta import relativedelta
 import io
 import base64
 
+# Check for openpyxl
+try:
+    import openpyxl
+except ImportError:
+    st.error("The 'openpyxl' library is missing. Please install it using 'pip install openpyxl>=3.1.0' or ensure it is included in your environment's requirements.txt.")
+    st.stop()
+
 # Backend logic (unchanged)
 def read_excel_data(file, sheet_name=0):
     """
@@ -274,13 +281,13 @@ def main():
 
     if uploaded_file is not None:
         # Read Excel file to get sheet names
-        xl = pd.ExcelFile(uploaded_file)
-        sheet_names = xl.sheet_names
-        sheet_name = st.selectbox("Select Sheet", ["First Sheet"] + sheet_names, index=0)
-        sheet = 0 if sheet_name == "First Sheet" else sheet_name
+        try:
+            xl = pd.ExcelFile(uploaded_file)
+            sheet_names = xl.sheet_names
+            sheet_name = st.selectbox("Select Sheet", ["First Sheet"] + sheet_names, index=0)
+            sheet = 0 if sheet_name == "First Sheet" else sheet_name
 
-        if st.button("Process Transactions"):
-            try:
+            if st.button("Process Transactions"):
                 # Reset file pointer
                 uploaded_file.seek(0)
                 # Read data
@@ -346,8 +353,8 @@ def main():
                     ])
                     st.dataframe(pending_df)
                 
-            except Exception as e:
-                st.error(f"Error processing file: {str(e)}")
+        except Exception as e:
+            st.error(f"Error processing file: {str(e)}")
     else:
         st.info("Please upload an Excel file to begin.")
 
